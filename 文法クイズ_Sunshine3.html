@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>英語文法クイズ — Sunshine 3</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#4C6EF5;--success:#51CF66;--danger:#FF6B6B;--warn:#FFD43B;
+  --bg:#0F0C29;--card:#1a1a3e;--card2:#22224a;--text:#F8F9FA;--sub:#ADB5BD;
+  --radius:16px;--shadow:0 8px 32px rgba(0,0,0,.4);
+}
+body{
+  font-family:'Segoe UI','Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;
+  background:linear-gradient(135deg,#0F0C29 0%,#302B63 50%,#24243E 100%);
+  min-height:100vh;color:var(--text);user-select:none;overflow-x:hidden;
+}
+
+/* ===== SHARED ===== */
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:12px;
+  font-size:1rem;font-weight:700;font-family:inherit;cursor:pointer;transition:.15s;}
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-primary:hover{filter:brightness(1.15);}
+.btn-primary:active{transform:scale(.97);}
+.btn-ghost{background:rgba(255,255,255,.1);color:var(--text);}
+.btn-ghost:hover{background:rgba(255,255,255,.18);}
+.section-title{font-size:.75rem;font-weight:700;letter-spacing:.1em;color:var(--sub);text-transform:uppercase;margin-bottom:10px;}
+.chip-row{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{padding:7px 16px;border-radius:20px;font-size:.85rem;font-weight:700;
+  border:2px solid rgba(255,255,255,.18);background:transparent;
+  color:var(--text);cursor:pointer;transition:.15s;}
+.chip.selected{background:var(--primary);border-color:var(--primary);}
+.chip:hover{border-color:var(--primary);}
+
+/* ===== HOME ===== */
+#screen-home{display:flex;flex-direction:column;align-items:center;padding:20px;min-height:100vh;}
+.home-header{text-align:center;padding:24px 0 16px;}
+.home-header h1{font-size:1.7rem;font-weight:900;
+  background:linear-gradient(90deg,#FF6B6B,#FFD43B,#51CF66,#4C6EF5,#FF9FF3);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.home-header p{color:var(--sub);font-size:.83rem;margin-top:6px;}
+.home-inner{width:100%;max-width:480px;}
+.filter-card{background:var(--card);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;}
+.wrong-banner{
+  background:linear-gradient(90deg,rgba(255,107,107,.2),rgba(255,107,107,.05));
+  border:1px solid rgba(255,107,107,.4);border-radius:var(--radius);
+  padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.wrong-banner .info{flex:1;}
+.wrong-banner .label{font-size:.75rem;color:var(--danger);font-weight:700;margin-bottom:2px;}
+.wrong-banner .count{font-size:1.1rem;font-weight:900;}
+.wrong-banner button{padding:10px 16px;border:none;border-radius:10px;
+  background:var(--danger);color:#fff;font-size:.85rem;font-weight:700;
+  font-family:inherit;cursor:pointer;white-space:nowrap;}
+
+/* ===== QUIZ ===== */
+#screen-quiz{display:none;flex-direction:column;min-height:100vh;padding:16px;max-width:560px;margin:0 auto;}
+.quiz-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.quiz-prog-label{font-size:.78rem;color:var(--sub);font-weight:600;}
+.quiz-score-label{font-size:.83rem;font-weight:700;}
+.quiz-score-label span{color:var(--success);}
+.pbar-wrap{height:6px;background:rgba(255,255,255,.1);border-radius:3px;margin-bottom:10px;}
+.pbar-fill{height:100%;border-radius:3px;background:var(--primary);transition:width .35s;}
+
+/* Timer */
+.timer-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.timer-num{font-size:1.1rem;font-weight:900;min-width:28px;text-align:center;transition:color .3s;}
+.timer-num.warn{color:var(--warn);}
+.timer-num.danger{color:var(--danger);}
+.timer-bar-wrap{flex:1;height:8px;background:rgba(255,255,255,.1);border-radius:4px;}
+.timer-bar-fill{height:100%;border-radius:4px;transition:width 1s linear,background .3s;}
+
+.qtype-badge{display:inline-block;padding:4px 12px;border-radius:10px;font-size:.73rem;font-weight:700;
+  letter-spacing:.06em;margin-bottom:10px;}
+.qtype-fill{background:rgba(76,110,245,.25);color:#a5b4fc;}
+.qtype-order{background:rgba(255,212,59,.2);color:#fde68a;}
+.grammar-tag{font-size:.75rem;color:var(--sub);margin-bottom:8px;}
+.translation-box{background:rgba(255,255,255,.06);border-radius:10px;padding:10px 14px;
+  font-size:.9rem;color:#c8d3e0;margin-bottom:14px;line-height:1.5;}
+
+/* Fill UI */
+.fill-sentence{background:var(--card);border-radius:var(--radius);padding:22px 20px;
+  font-size:1.2rem;font-weight:700;line-height:1.7;text-align:center;
+  margin-bottom:18px;box-shadow:var(--shadow);}
+.fill-blank{display:inline-block;min-width:80px;border-bottom:3px solid var(--primary);
+  padding:0 6px;color:var(--warn);}
+.choices-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.choice-btn{background:var(--card);border:2px solid rgba(255,255,255,.12);border-radius:12px;
+  padding:15px 10px;text-align:center;font-size:.95rem;font-weight:700;
+  color:var(--text);cursor:pointer;transition:.15s;font-family:inherit;}
+.choice-btn:hover:not(:disabled){border-color:var(--primary);background:rgba(76,110,245,.15);}
+.choice-btn.correct{background:rgba(81,207,102,.2);border-color:var(--success)!important;color:var(--success);}
+.choice-btn.wrong{background:rgba(255,107,107,.2);border-color:var(--danger)!important;color:var(--danger);}
+.choice-btn:disabled{cursor:default;}
+
+/* Order UI */
+.order-answer-area{min-height:64px;background:var(--card);border-radius:12px;
+  border:2px dashed rgba(255,255,255,.2);padding:10px 12px;
+  display:flex;flex-wrap:wrap;gap:7px;align-items:center;
+  margin-bottom:12px;position:relative;}
+.order-answer-area.empty::before{content:'タップして単語を並べよう';
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  font-size:.8rem;color:var(--sub);white-space:nowrap;pointer-events:none;}
+.order-pool{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;min-height:44px;}
+.word-chip{background:var(--card2);border:2px solid rgba(255,255,255,.18);
+  border-radius:10px;padding:9px 14px;font-size:.95rem;font-weight:700;
+  cursor:pointer;transition:.15s;color:var(--text);}
+.word-chip:hover{border-color:var(--primary);background:rgba(76,110,245,.2);}
+.word-chip.placed{background:rgba(76,110,245,.2);border-color:var(--primary);}
+.word-chip.correct{background:rgba(81,207,102,.2);border-color:var(--success);color:var(--success);}
+.word-chip.wrong{background:rgba(255,107,107,.2);border-color:var(--danger);color:var(--danger);}
+.check-btn{width:100%;padding:14px;border:none;border-radius:12px;background:var(--primary);
+  color:#fff;font-size:1rem;font-weight:700;font-family:inherit;cursor:pointer;
+  transition:.15s;margin-bottom:14px;}
+.check-btn:disabled{opacity:.45;cursor:default;}
+
+/* Feedback */
+.feedback-bar{border-radius:12px;padding:12px 16px;font-size:.9rem;font-weight:700;
+  margin-bottom:12px;display:none;line-height:1.6;}
+.feedback-bar.ok{background:rgba(81,207,102,.18);border:1px solid rgba(81,207,102,.4);color:var(--success);}
+.feedback-bar.ng{background:rgba(255,107,107,.15);border:1px solid rgba(255,107,107,.35);color:#fca5a5;}
+.feedback-bar .correct-ans{font-size:.85rem;color:var(--text);margin-top:4px;}
+.feedback-bar .ref-row{font-size:.78rem;color:var(--sub);margin-top:6px;}
+.feedback-bar .ref-row b{color:var(--warn);}
+.next-btn{width:100%;padding:13px;border:none;border-radius:12px;background:var(--card2);
+  color:var(--text);font-size:.95rem;font-weight:700;font-family:inherit;cursor:pointer;
+  display:none;transition:.15s;}
+.next-btn:hover{background:rgba(255,255,255,.15);}
+.hint-btn{background:none;border:none;color:var(--sub);font-size:.78rem;cursor:pointer;
+  font-family:inherit;padding:4px 0;display:block;width:100%;text-align:center;margin-bottom:8px;}
+.hint-box{background:rgba(255,255,255,.06);border-radius:8px;padding:8px 12px;
+  font-size:.8rem;color:#c8d3e0;margin-bottom:10px;display:none;}
+
+/* ===== RESULT ===== */
+#screen-result{display:none;flex-direction:column;min-height:100vh;padding:20px;max-width:560px;margin:0 auto;}
+.result-hero{text-align:center;margin-bottom:20px;}
+.result-emoji{font-size:3.5rem;}
+.result-score-big{font-size:2rem;font-weight:900;margin-top:8px;}
+.result-sub{color:var(--sub);font-size:.85rem;margin-top:4px;}
+.result-bar-wrap{height:12px;background:rgba(255,255,255,.1);border-radius:6px;margin:12px 0;}
+.result-bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--primary),var(--success));transition:width .6s;}
+.wrong-list{margin:14px 0;}
+.wrong-item{background:var(--card);border-radius:12px;padding:14px 16px;margin-bottom:10px;border-left:3px solid var(--danger);}
+.wrong-item .q-label{font-size:.72rem;color:var(--sub);margin-bottom:4px;}
+.wrong-item .q-text{font-size:.9rem;font-weight:700;margin-bottom:6px;}
+.wrong-item .your-ans{font-size:.8rem;color:var(--danger);margin-bottom:2px;}
+.wrong-item .correct-ans{font-size:.8rem;color:var(--success);margin-bottom:6px;}
+.wrong-item .refs{font-size:.75rem;color:var(--sub);}
+.wrong-item .refs b{color:var(--warn);}
+.result-btns{display:flex;flex-direction:column;gap:10px;margin-top:20px;}
+
+/* ===== ANIMATIONS ===== */
+@keyframes shake{0%,100%{transform:translateX(0)}25%,75%{transform:translateX(-7px)}50%{transform:translateX(7px)}}
+.shake{animation:shake .35s ease;}
+@keyframes pop{0%{transform:scale(.82);opacity:0}100%{transform:scale(1);opacity:1}}
+.pop{animation:pop .18s ease;}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.pulse{animation:pulse .4s ease;}
+</style>
+</head>
+<body>
+
+<!-- ============================== HOME ============================== -->
+<div id="screen-home">
+  <div class="home-header">
+    <h1>英語文法クイズ</h1>
+    <p>Sunshine 3 — Program 1 文法確認テスト</p>
+  </div>
+  <div class="home-inner">
+
+    <div id="wrong-banner" class="wrong-banner" style="display:none">
+      <div class="info">
+        <div class="label">苦手問題</div>
+        <div class="count" id="wrong-count-label">0問</div>
+      </div>
+      <button onclick="startWrongMode()">苦手を練習する</button>
+    </div>
+
+    <div class="filter-card">
+      <div class="section-title">問題タイプ</div>
+      <div class="chip-row" id="type-chips">
+        <span class="chip selected" data-qtype="all" onclick="selectChip('type-chips',this,'typeFilter','all')">すべて</span>
+        <span class="chip" data-qtype="fill" onclick="selectChip('type-chips',this,'typeFilter','fill')">穴埋め（4択）</span>
+        <span class="chip" data-qtype="order" onclick="selectChip('type-chips',this,'typeFilter','order')">並べ替え</span>
+      </div>
+    </div>
+
+    <div class="filter-card">
+      <div class="section-title">問題数</div>
+      <div class="chip-row" id="count-chips">
+        <span class="chip" data-n="5" onclick="selectChip('count-chips',this,'countSetting',5)">5問</span>
+        <span class="chip selected" data-n="10" onclick="selectChip('count-chips',this,'countSetting',10)">10問</span>
+        <span class="chip" data-n="20" onclick="selectChip('count-chips',this,'countSetting',20)">20問</span>
+        <span class="chip" data-n="0" onclick="selectChip('count-chips',this,'countSetting',0)">全問（<span id="total-count">?</span>問）</span>
+      </div>
+    </div>
+
+    <div class="filter-card">
+      <div class="section-title">制限時間（1問あたり）</div>
+      <div class="chip-row" id="timer-chips">
+        <span class="chip" data-t="20" onclick="selectChip('timer-chips',this,'timerSetting',20)">20秒</span>
+        <span class="chip" data-t="30" onclick="selectChip('timer-chips',this,'timerSetting',30)">30秒</span>
+        <span class="chip" data-t="60" onclick="selectChip('timer-chips',this,'timerSetting',60)">60秒</span>
+        <span class="chip selected" data-t="0" onclick="selectChip('timer-chips',this,'timerSetting',0)">制限なし</span>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="startNormalMode()" style="margin-top:6px">スタート ▶</button>
+  </div>
+</div>
+
+<!-- ============================== QUIZ ============================== -->
+<div id="screen-quiz">
+  <div class="quiz-topbar">
+    <div class="quiz-prog-label" id="quiz-prog-label">Program 1 — 1/10問</div>
+    <div class="quiz-score-label">正解 <span id="quiz-correct">0</span></div>
+  </div>
+  <div class="pbar-wrap"><div class="pbar-fill" id="pbar-fill" style="width:0%"></div></div>
+
+  <!-- Timer bar -->
+  <div class="timer-row" id="timer-row" style="display:none">
+    <div class="timer-num" id="timer-num">30</div>
+    <div class="timer-bar-wrap"><div class="timer-bar-fill" id="timer-bar-fill" style="width:100%;background:var(--success)"></div></div>
+  </div>
+
+  <div id="qtype-badge" class="qtype-badge qtype-fill">穴埋め（4択）</div>
+  <div class="grammar-tag" id="grammar-tag"></div>
+  <div class="translation-box" id="translation-box"></div>
+
+  <!-- Fill UI -->
+  <div id="fill-ui">
+    <div class="fill-sentence" id="fill-sentence"></div>
+    <div class="choices-grid" id="choices-grid"></div>
+  </div>
+
+  <!-- Order UI -->
+  <div id="order-ui" style="display:none">
+    <div class="order-answer-area empty" id="order-answer-area"></div>
+    <div class="order-pool" id="order-pool"></div>
+    <button class="check-btn" id="check-btn" onclick="checkOrder()" disabled>答え合わせ</button>
+  </div>
+
+  <button class="hint-btn" id="hint-btn" onclick="toggleHint()">💡 ヒントを見る</button>
+  <div class="hint-box" id="hint-box"></div>
+
+  <div class="feedback-bar" id="feedback-bar"></div>
+  <button class="next-btn" id="next-btn" onclick="nextQuestion()">次の問題 →</button>
+
+  <button onclick="showHome()" style="margin-top:auto;padding:10px;background:none;border:none;color:var(--sub);font-size:.8rem;cursor:pointer;font-family:inherit">← ホームに戻る</button>
+</div>
+
+<!-- ============================== RESULT ============================== -->
+<div id="screen-result">
+  <div class="result-hero">
+    <div class="result-emoji" id="result-emoji">🏆</div>
+    <div class="result-score-big" id="result-score-big"></div>
+    <div class="result-sub" id="result-sub"></div>
+    <div class="result-bar-wrap"><div class="result-bar-fill" id="result-bar-fill" style="width:0%"></div></div>
+  </div>
+
+  <div id="wrong-section" style="display:none">
+    <div class="section-title">間違えた問題（復習リスト）</div>
+    <div class="wrong-list" id="wrong-list"></div>
+  </div>
+
+  <div class="result-btns">
+    <button class="btn btn-danger" id="retry-wrong-btn" style="display:none" onclick="startWrongMode()">❌ 間違えた問題をもう一度</button>
+    <button class="btn btn-primary" onclick="startNormalMode()">もう一度（同じ設定）</button>
+    <button class="btn btn-ghost" onclick="showHome()">ホームに戻る</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// QUESTION BANK — Program 1（全50問）
+// ============================================================
+// 文法項目:
+//   G1: want to do (No.20, pp.028)
+//   G2: want / tell / ask A to do (No.21–22, pp.029–030)
+//   G3: It is ~ (for A) to do (No.27–28, pp.035–036) 教科書 pp.9,12
+//   G4: 現在完了形（経験）have/has + 過去分詞 (No.6–9, pp.014–017) 教科書 pp.9,13
+
+const QUESTIONS = [
+
+  // ==================== G1: want to do ====================
+  {id:'g1_f1', type:'fill', grammar:'want to do', tbPage:'p.9',
+   drillNo:'No.20', drillPage:'p.028', diff:1,
+   sentence:'I ___ to be a teacher.',
+   answer:'want', choices:['want','wants','wanted','wanting'],
+   tr:'私は先生になりたい。', hint:'「〜したい」= want to do（1人称は want）'},
+
+  {id:'g1_f2', type:'fill', grammar:'want to do', tbPage:'p.9',
+   drillNo:'No.20', drillPage:'p.028', diff:1,
+   sentence:'She wants ___ a nurse.',
+   answer:'to be', choices:['to be','be','being','been'],
+   tr:'彼女は看護師になりたい。', hint:'want の後ろは to + 動詞原形'},
+
+  {id:'g1_f3', type:'fill', grammar:'want to do', tbPage:'p.9',
+   drillNo:'No.20', drillPage:'p.028', diff:2,
+   sentence:'I want to ___ English well.',
+   answer:'speak', choices:['speak','spoke','speaking','spoken'],
+   tr:'私は英語を上手に話したい。', hint:'to の後ろは動詞の原形'},
+
+  {id:'g1_f4', type:'fill', grammar:'want to do', tbPage:'p.9',
+   drillNo:'No.20', drillPage:'p.028', diff:2,
+   sentence:'He ___ to travel the world.',
+   answer:'wants', choices:['wants','want','wanted','wanting'],
+   tr:'彼は世界を旅したい。', hint:'主語が He のとき wants（三単現の s）'},
+
+  {id:'g1_o1', type:'order', grammar:'want to do', tbPage:'p.9',
+   drillNo:'No.20', drillPage:'p.028', diff:1,
+   words:['I','want','to','be','a','teacher','.'],
+   answer:'I want to be a teacher.',
+   tr:'私は先生になりたい。', hint:'want + to + 動詞原形'},
+
+  {id:'g1_o2', type:'order', grammar:'want to do', tbPage:'p.9',
+   drillNo:'No.20', drillPage:'p.028', diff:2,
+   words:['She','wants','to','become','a','nurse','.'],
+   answer:'She wants to become a nurse.',
+   tr:'彼女は看護師になりたい。', hint:'主語が She のとき wants'},
+
+  // ==================== G2: want / tell / ask A to do ====================
+  {id:'g2_f1', type:'fill', grammar:'want / tell / ask A to do', tbPage:'p.11',
+   drillNo:'No.21–22', drillPage:'pp.029–030', diff:1,
+   sentence:'I want Bob ___ a teacher.',
+   answer:'to be', choices:['to be','be','being','been'],
+   tr:'私はボブに先生になってほしい。', hint:'want A to do = AにVしてほしい'},
+
+  {id:'g2_f2', type:'fill', grammar:'want / tell / ask A to do', tbPage:'p.11',
+   drillNo:'No.22', drillPage:'p.030', diff:1,
+   sentence:'She asked him ___ the door.',
+   answer:'to open', choices:['to open','open','opening','opened'],
+   tr:'彼女は彼にドアを開けるよう頼んだ。', hint:'ask A to do = AにVするよう頼む'},
+
+  {id:'g2_f3', type:'fill', grammar:'want / tell / ask A to do', tbPage:'p.11',
+   drillNo:'No.22', drillPage:'p.030', diff:1,
+   sentence:'I told Bob ___ me.',
+   answer:'to call', choices:['to call','calling','called','call'],
+   tr:'私はボブに電話するよう言った。', hint:'tell A to do = AにVするよう言う'},
+
+  {id:'g2_f4', type:'fill', grammar:'want / tell / ask A to do', tbPage:'p.11',
+   drillNo:'No.22', drillPage:'pp.029–030', diff:1,
+   sentence:'He wants her ___ happy.',
+   answer:'to be', choices:['to be','be','being','is'],
+   tr:'彼は彼女に幸せでいてほしい。', hint:'want A to do の形'},
+
+  {id:'g2_f5', type:'fill', grammar:'want / tell / ask A to do', tbPage:'p.11',
+   drillNo:'No.22', drillPage:'p.030', diff:2,
+   sentence:'My mother told me ___ home early.',
+   answer:'to come', choices:['to come','coming','come','came'],
+   tr:'母は私に早く帰るよう言った。', hint:'told A to do の形'},
+
+  {id:'g2_f6', type:'fill', grammar:'want / tell / ask A to do', tbPage:'p.11',
+   drillNo:'No.22', drillPage:'p.030', diff:2,
+   sentence:'The teacher asked us ___ quiet.',
+   answer:'to be', choices:['to be','be','being','to stay'],
+   tr:'先生は私たちに静かにするよう頼んだ。', hint:'asked A to do の形'},
+
+  {id:'g2_f7', type:'fill', grammar:'want / tell / ask A to do', tbPage:'p.11',
+   drillNo:'No.21', drillPage:'p.029', diff:2,
+   sentence:'I want you ___ me.',
+   answer:'to help', choices:['to help','help','helping','helped'],
+   tr:'私はあなたに手伝ってほしい。', hint:'want A to do の形'},
+
+  {id:'g2_f8', type:'fill', grammar:'want / tell / ask A to do', tbPage:'p.11',
+   drillNo:'No.22', drillPage:'p.030', diff:2,
+   sentence:'She told him ___ his room.',
+   answer:'to clean', choices:['to clean','clean','cleaning','cleaned'],
+   tr:'彼女は彼に部屋を掃除するよう言った。', hint:'told A to do の形'},
+
+  {id:'g2_f9', type:'fill', grammar:'want / tell / ask A to do', tbPage:'p.11',
+   drillNo:'No.22', drillPage:'p.030', diff:2,
+   sentence:'I asked her ___ here.',
+   answer:'to wait', choices:['to wait','wait','waiting','waited'],
+   tr:'私は彼女にここで待つよう頼んだ。', hint:'asked A to do の形'},
+
+  {id:'g2_f10', type:'fill', grammar:'want / tell / ask A to do', tbPage:'p.11',
+   drillNo:'No.21', drillPage:'p.029', diff:3,
+   sentence:'Dad wants me ___ a scientist.',
+   answer:'to become', choices:['to become','become','becoming','became'],
+   tr:'お父さんは私に科学者になってほしい。', hint:'want A to do の形'},
+
+  {id:'g2_f11', type:'fill', grammar:'want / tell / ask A to do', tbPage:'p.11',
+   drillNo:'No.22', drillPage:'p.030', diff:3,
+   sentence:'She ___ him to take a rest.',
+   answer:'told', choices:['told','tell','asks','asked'],
+   tr:'彼女は彼に休むよう言った。', hint:'過去形の told A to do'},
+
+  {id:'g2_f12', type:'fill', grammar:'want / tell / ask A to do', tbPage:'p.11',
+   drillNo:'No.22', drillPage:'p.030', diff:3,
+   sentence:'He asked me ___ my bag.',
+   answer:'to carry', choices:['to carry','carry','carrying','carried'],
+   tr:'彼は私にバッグを運ぶよう頼んだ。', hint:'asked A to do の形'},
+
+  {id:'g2_o1', type:'order', grammar:'want / tell / ask A to do', tbPage:'p.11',
+   drillNo:'No.21', drillPage:'p.029', diff:1,
+   words:['I','want','Bob','to','be','a','teacher','.'],
+   answer:'I want Bob to be a teacher.',
+   tr:'私はボブに先生になってほしい。', hint:'want ＋人＋ to ＋動詞原形'},
+
+  {id:'g2_o2', type:'order', grammar:'want / tell / ask A to do', tbPage:'p.11',
+   drillNo:'No.22', drillPage:'p.030', diff:2,
+   words:['She','asked','him','to','open','the','door','.'],
+   answer:'She asked him to open the door.',
+   tr:'彼女は彼にドアを開けるよう頼んだ。', hint:'ask ＋人＋ to ＋動詞原形'},
+
+  {id:'g2_o3', type:'order', grammar:'want / tell / ask A to do', tbPage:'p.11',
+   drillNo:'No.22', drillPage:'p.030', diff:2,
+   words:['I','told','Bob','to','call','me','.'],
+   answer:'I told Bob to call me.',
+   tr:'私はボブに電話するよう言った。', hint:'tell ＋人＋ to ＋動詞原形'},
+
+  {id:'g2_o4', type:'order', grammar:'want / tell / ask A to do', tbPage:'p.11',
+   drillNo:'No.22', drillPage:'p.030', diff:2,
+   words:['My','mother','told','me','to','come','home','early','.'],
+   answer:'My mother told me to come home early.',
+   tr:'母は私に早く帰るよう言った。', hint:'told ＋人＋ to ＋動詞原形'},
+
+  {id:'g2_o5', type:'order', grammar:'want / tell / ask A to do', tbPage:'p.11',
+   drillNo:'No.22', drillPage:'p.030', diff:3,
+   words:['The','teacher','asked','us','to','be','quiet','.'],
+   answer:'The teacher asked us to be quiet.',
+   tr:'先生は私たちに静かにするよう頼んだ。', hint:'asked ＋人＋ to ＋動詞原形'},
+
+  // ==================== G3: It is ~ (for A) to do ====================
+  {id:'g3_f1', type:'fill', grammar:'It is ~ (for A) to do', tbPage:'p.12',
+   drillNo:'No.27–28', drillPage:'pp.035–036', diff:1,
+   sentence:'___ is good to get up early.',
+   answer:'It', choices:['It','This','That','There'],
+   tr:'早起きすることはよいことだ。', hint:'形式主語の it で始める'},
+
+  {id:'g3_f2', type:'fill', grammar:'It is ~ (for A) to do', tbPage:'p.12',
+   drillNo:'No.28', drillPage:'p.036', diff:1,
+   sentence:'It is good ___ us to get up early.',
+   answer:'for', choices:['for','to','of','at'],
+   tr:'私たちが早起きすることはよいことだ。', hint:'It is ~ for A to do の A の前は for'},
+
+  {id:'g3_f3', type:'fill', grammar:'It is ~ (for A) to do', tbPage:'p.12',
+   drillNo:'No.28', drillPage:'p.036', diff:1,
+   sentence:'It is easy ___ me to swim.',
+   answer:'for', choices:['for','to','of','by'],
+   tr:'私が泳ぐのは簡単だ。', hint:'It is 形容詞 for A to do の for'},
+
+  {id:'g3_f4', type:'fill', grammar:'It is ~ (for A) to do', tbPage:'p.12',
+   drillNo:'No.27', drillPage:'p.035', diff:1,
+   sentence:'It is fun ___ play soccer.',
+   answer:'to', choices:['to','for','of','and'],
+   tr:'サッカーをするのは楽しい。', hint:'It is 形容詞 to do → to の後ろは動詞原形'},
+
+  {id:'g3_f5', type:'fill', grammar:'It is ~ (for A) to do', tbPage:'p.12',
+   drillNo:'No.28', drillPage:'p.036', diff:2,
+   sentence:'___ is difficult for him to read this book.',
+   answer:'It', choices:['It','This','That','There'],
+   tr:'彼がこの本を読むのは難しい。', hint:'形式主語の it'},
+
+  {id:'g3_f6', type:'fill', grammar:'It is ~ (for A) to do', tbPage:'p.12',
+   drillNo:'No.28', drillPage:'p.036', diff:2,
+   sentence:'It is important for students ___ read books.',
+   answer:'to', choices:['to','for','and','of'],
+   tr:'生徒が本を読むことは大切だ。', hint:'for A の後ろは to + 動詞原形'},
+
+  {id:'g3_f7', type:'fill', grammar:'It is ~ (for A) to do', tbPage:'p.12',
+   drillNo:'No.27', drillPage:'p.035', diff:2,
+   sentence:'It is hard for me ___ wake up early.',
+   answer:'to', choices:['to','and','for','of'],
+   tr:'私が早起きするのはつらい。', hint:'for A の後ろは to + 動詞原形'},
+
+  {id:'g3_f8', type:'fill', grammar:'It is ~ (for A) to do', tbPage:'p.12',
+   drillNo:'No.28', drillPage:'p.036', diff:3,
+   sentence:'It is ___ for us to study English.',
+   answer:'important', choices:['important','importance','importantly','import'],
+   tr:'私たちが英語を勉強することは大切だ。', hint:'It is 形容詞 for A to do の形容詞'},
+
+  {id:'g3_o1', type:'order', grammar:'It is ~ (for A) to do', tbPage:'p.12',
+   drillNo:'No.27', drillPage:'p.035', diff:1,
+   words:['It','is','good','to','get','up','early','.'],
+   answer:'It is good to get up early.',
+   tr:'早起きすることはよいことだ。', hint:'It is 形容詞 to do'},
+
+  {id:'g3_o2', type:'order', grammar:'It is ~ (for A) to do', tbPage:'p.12',
+   drillNo:'No.28', drillPage:'p.036', diff:2,
+   words:['It','is','good','for','us','to','get','up','early','.'],
+   answer:'It is good for us to get up early.',
+   tr:'私たちが早起きすることはよいことだ。', hint:'It is 形容詞 for A to do'},
+
+  {id:'g3_o3', type:'order', grammar:'It is ~ (for A) to do', tbPage:'p.12',
+   drillNo:'No.28', drillPage:'p.036', diff:2,
+   words:['It','is','easy','for','me','to','swim','.'],
+   answer:'It is easy for me to swim.',
+   tr:'私が泳ぐのは簡単だ。', hint:'It is 形容詞 for A to do'},
+
+  {id:'g3_o4', type:'order', grammar:'It is ~ (for A) to do', tbPage:'p.12',
+   drillNo:'No.28', drillPage:'p.036', diff:3,
+   words:['It','is','important','for','us','to','study','English','.'],
+   answer:'It is important for us to study English.',
+   tr:'私たちが英語を勉強することは大切だ。', hint:'It is 形容詞 for A to do'},
+
+  // ==================== G3b: It was ~ (for A) to do（過去形）====================
+  {id:'g3b_f1', type:'fill', grammar:'It was ~ (for A) to do（be動詞の過去形）', tbPage:'p.12',
+   drillNo:'No.27–28', drillPage:'pp.035–036', diff:1,
+   sentence:'It ___ difficult for me to answer the question.',
+   answer:'was', choices:['was','is','were','had'],
+   tr:'その質問に答えるのは私には難しかった。',
+   hint:'is → was に変えると過去の話に（be動詞の過去形）'},
+
+  {id:'g3b_f2', type:'fill', grammar:'It was ~ (for A) to do（be動詞の過去形）', tbPage:'p.12',
+   drillNo:'No.27–28', drillPage:'pp.035–036', diff:1,
+   sentence:'It was ___ for him to climb the mountain.',
+   answer:'hard', choices:['hard','easy','good','great'],
+   tr:'彼が山に登るのは大変だった。',
+   hint:'It was 形容詞 for A to do（過去形）'},
+
+  {id:'g3b_f3', type:'fill', grammar:'It was ~ (for A) to do（be動詞の過去形）', tbPage:'p.12',
+   drillNo:'No.27–28', drillPage:'pp.035–036', diff:1,
+   sentence:'___ was fun for us to play soccer yesterday.',
+   answer:'It', choices:['It','This','That','There'],
+   tr:'昨日、私たちがサッカーをするのは楽しかった。',
+   hint:'形式主語の it（過去形では was を使う）'},
+
+  {id:'g3b_f4', type:'fill', grammar:'It was ~ (for A) to do（be動詞の過去形）', tbPage:'p.12',
+   drillNo:'No.27–28', drillPage:'pp.035–036', diff:2,
+   sentence:'It was easy ___ me to swim when I was young.',
+   answer:'for', choices:['for','to','of','at'],
+   tr:'若い頃、私が泳ぐのは簡単だった。',
+   hint:'It was ~ for A to do の A の前は for'},
+
+  {id:'g3b_f5', type:'fill', grammar:'It was ~ (for A) to do（be動詞の過去形）', tbPage:'p.12',
+   drillNo:'No.27–28', drillPage:'pp.035–036', diff:2,
+   sentence:'It was important for us ___ study English.',
+   answer:'to', choices:['to','for','and','of'],
+   tr:'私たちが英語を勉強することは大切だった。',
+   hint:'for A の後ろは to + 動詞原形（現在・過去どちらも同じ）'},
+
+  {id:'g3b_f6', type:'fill', grammar:'It was ~ (for A) to do（be動詞の過去形）', tbPage:'p.12',
+   drillNo:'No.27–28', drillPage:'pp.035–036', diff:2,
+   sentence:'It was ___ for her to speak English then.',
+   answer:'difficult', choices:['difficult','difficulty','difficultly','important'],
+   tr:'そのとき、彼女が英語を話すのは難しかった。',
+   hint:'It was 形容詞 for A to do の形容詞部分'},
+
+  {id:'g3b_o1', type:'order', grammar:'It was ~ (for A) to do（be動詞の過去形）', tbPage:'p.12',
+   drillNo:'No.27–28', drillPage:'pp.035–036', diff:2,
+   words:['It','was','fun','for','us','to','play','soccer','yesterday','.'],
+   answer:'It was fun for us to play soccer yesterday.',
+   tr:'昨日、私たちがサッカーをするのは楽しかった。',
+   hint:'It is → It was に変えると過去の話に'},
+
+  {id:'g3b_o2', type:'order', grammar:'It was ~ (for A) to do（be動詞の過去形）', tbPage:'p.12',
+   drillNo:'No.27–28', drillPage:'pp.035–036', diff:3,
+   words:['It','was','difficult','for','me','to','answer','the','question','.'],
+   answer:'It was difficult for me to answer the question.',
+   tr:'その質問に答えるのは私には難しかった。',
+   hint:'It was 形容詞 for A to do（過去形）'},
+
+  {id:'g3b_o3', type:'order', grammar:'It was ~ (for A) to do（be動詞の過去形）', tbPage:'p.12',
+   drillNo:'No.27–28', drillPage:'pp.035–036', diff:3,
+   words:['It','was','easy','for','him','to','climb','the','mountain','.'],
+   answer:'It was easy for him to climb the mountain.',
+   tr:'彼が山に登るのは簡単だった。',
+   hint:'It was 形容詞 for A to do（過去形）'},
+
+  // ==================== G4: 現在完了形（経験）====================
+  {id:'g4_f1', type:'fill', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.6–8', drillPage:'pp.014–016', diff:1,
+   sentence:'I ___ seen this movie once.',
+   answer:'have', choices:['have','has','had','am'],
+   tr:'私はこの映画を一度見たことがある。', hint:'I のときは have'},
+
+  {id:'g4_f2', type:'fill', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.7', drillPage:'p.015', diff:1,
+   sentence:'Have you ___ seen this movie?',
+   answer:'ever', choices:['ever','never','just','already'],
+   tr:'あなたはこの映画を見たことがありますか。', hint:'経験の疑問文には ever'},
+
+  {id:'g4_f3', type:'fill', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.8', drillPage:'p.016', diff:1,
+   sentence:'I have ___ seen this movie.',
+   answer:'never', choices:['never','not','no','none'],
+   tr:'私はこの映画を一度も見たことがない。', hint:'一度も〜ない = have never 過去分詞'},
+
+  {id:'g4_f4', type:'fill', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.6', drillPage:'p.014', diff:1,
+   sentence:'She ___ visited Kyoto twice.',
+   answer:'has', choices:['has','have','had','is'],
+   tr:'彼女は京都を2度訪れたことがある。', hint:'She のときは has'},
+
+  {id:'g4_f5', type:'fill', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.7', drillPage:'p.015', diff:1,
+   sentence:'Have you ever ___ Mt. Fuji?',
+   answer:'climbed', choices:['climbed','climb','climbing','clumb'],
+   tr:'あなたは富士山に登ったことがありますか。', hint:'have ever + 過去分詞'},
+
+  {id:'g4_f6', type:'fill', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.8', drillPage:'p.016', diff:1,
+   sentence:'I have never ___ natto.',
+   answer:'eaten', choices:['eaten','eat','eating','ate'],
+   tr:'私は納豆を食べたことがない。', hint:'have never + 過去分詞（eat → eaten）'},
+
+  {id:'g4_f7', type:'fill', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.7', drillPage:'p.015', diff:2,
+   sentence:'___ she ever been to Paris?',
+   answer:'Has', choices:['Has','Have','Had','Is'],
+   tr:'彼女はパリに行ったことがありますか。', hint:'She のとき Has で疑問文を作る'},
+
+  {id:'g4_f8', type:'fill', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.8', drillPage:'p.016', diff:2,
+   sentence:'He has never ___ Japanese food.',
+   answer:'cooked', choices:['cooked','cook','cooking','cooks'],
+   tr:'彼は和食を作ったことがない。', hint:'has never + 過去分詞（cook → cooked）'},
+
+  {id:'g4_f9', type:'fill', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.7', drillPage:'p.015', diff:2,
+   sentence:'Have you ever ___ English with a foreigner?',
+   answer:'spoken', choices:['spoken','speak','speaking','spoke'],
+   tr:'あなたは外国人と英語を話したことがありますか。', hint:'have ever + 過去分詞（speak → spoken）'},
+
+  {id:'g4_f10', type:'fill', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.6', drillPage:'p.014', diff:2,
+   sentence:'I have ___ this song many times.',
+   answer:'heard', choices:['heard','hear','hearing','hears'],
+   tr:'私はこの歌を何度も聞いたことがある。', hint:'have + 過去分詞（hear → heard）'},
+
+  {id:'g4_f11', type:'fill', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.7', drillPage:'p.015', diff:2,
+   sentence:'Have you ever ___ sushi?',
+   answer:'made', choices:['made','make','making','makes'],
+   tr:'あなたは寿司を作ったことがありますか。', hint:'have ever + 過去分詞（make → made）'},
+
+  {id:'g4_f12', type:'fill', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.8', drillPage:'p.016', diff:2,
+   sentence:'She has never ___ abroad.',
+   answer:'been', choices:['been','be','is','was'],
+   tr:'彼女は海外に行ったことがない。', hint:'has never been to = 〜に行ったことがない'},
+
+  {id:'g4_f13', type:'fill', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.7', drillPage:'p.015', diff:3,
+   sentence:'___ you ever won a prize?',
+   answer:'Have', choices:['Have','Has','Had','Are'],
+   tr:'あなたは賞をとったことがありますか。', hint:'You のとき Have で疑問文を作る'},
+
+  {id:'g4_f14', type:'fill', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.6', drillPage:'p.014', diff:3,
+   sentence:'I have seen him ___ in this city.',
+   answer:'twice', choices:['twice','two','second','2nd'],
+   tr:'私は彼にこの街で2回会ったことがある。', hint:'回数は once / twice / three times'},
+
+  {id:'g4_o1', type:'order', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.6', drillPage:'p.014', diff:1,
+   words:['I','have','seen','this','movie','once','.'],
+   answer:'I have seen this movie once.',
+   tr:'私はこの映画を一度見たことがある。', hint:'have ＋過去分詞＋ once'},
+
+  {id:'g4_o2', type:'order', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.7', drillPage:'p.015', diff:1,
+   words:['Have','you','ever','seen','this','movie','?'],
+   answer:'Have you ever seen this movie?',
+   tr:'あなたはこの映画を見たことがありますか。', hint:'Have ＋主語＋ ever ＋過去分詞 ?'},
+
+  {id:'g4_o3', type:'order', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.8', drillPage:'p.016', diff:2,
+   words:['I','have','never','seen','this','movie','.'],
+   answer:'I have never seen this movie.',
+   tr:'私はこの映画を一度も見たことがない。', hint:'have never ＋過去分詞'},
+
+  {id:'g4_o4', type:'order', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.7', drillPage:'p.015', diff:2,
+   words:['Has','she','ever','been','to','Paris','?'],
+   answer:'Has she ever been to Paris?',
+   tr:'彼女はパリに行ったことがありますか。', hint:'Has ＋主語＋ ever ＋過去分詞 ?'},
+
+  {id:'g4_o5', type:'order', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.7', drillPage:'p.015', diff:2,
+   words:['Have','you','ever','climbed','Mt.','Fuji','?'],
+   answer:'Have you ever climbed Mt. Fuji?',
+   tr:'あなたは富士山に登ったことがありますか。', hint:'Have ＋主語＋ ever ＋過去分詞 ?'},
+
+  {id:'g4_o6', type:'order', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.8', drillPage:'p.016', diff:3,
+   words:['He','has','never','cooked','Japanese','food','.'],
+   answer:'He has never cooked Japanese food.',
+   tr:'彼は和食を作ったことがない。', hint:'has never ＋過去分詞'},
+
+  {id:'g4_o7', type:'order', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.8', drillPage:'p.016', diff:3,
+   words:['I','have','never','eaten','natto','.'],
+   answer:'I have never eaten natto.',
+   tr:'私は納豆を食べたことがない。', hint:'have never ＋過去分詞'},
+
+  {id:'g4_o8', type:'order', grammar:'現在完了形（経験）have/has + 過去分詞', tbPage:'p.13',
+   drillNo:'No.7', drillPage:'p.015', diff:3,
+   words:['Have','you','ever','spoken','English','with','a','foreigner','?'],
+   answer:'Have you ever spoken English with a foreigner?',
+   tr:'あなたは外国人と英語を話したことがありますか。', hint:'Have ＋主語＋ ever ＋過去分詞 ?'},
+
+];
+
+// ============================================================
+// SETTINGS & STORAGE
+// ============================================================
+const STORAGE_KEY = 'sunshine3_grammar_p1';
+
+function loadStore(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY))||{}; }catch{ return {}; } }
+function saveStore(d){ localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+
+function getWrongIds(){ return new Set(loadStore().wrongIds||[]); }
+function addWrongId(id){ const s=loadStore(); if(!s.wrongIds)s.wrongIds=[]; if(!s.wrongIds.includes(id))s.wrongIds.push(id); saveStore(s); }
+function removeWrongId(id){ const s=loadStore(); if(!s.wrongIds)return; s.wrongIds=s.wrongIds.filter(x=>x!==id); saveStore(s); }
+
+// ============================================================
+// SESSION STATE
+// ============================================================
+const cfg = { typeFilter:'all', countSetting:10, timerSetting:0 };
+
+const sess = {
+  queue:[], index:0, correct:0,
+  wrongInSession:[],
+  orderPool:[], orderSelected:[],
+  answered:false, wrongMode:false,
+  timerInterval:null, timerRemaining:0, timerTotal:0,
+};
+
+// ============================================================
+// HOME
+// ============================================================
+function selectChip(groupId, el, cfgKey, val){
+  document.querySelectorAll('#'+groupId+' .chip').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  cfg[cfgKey] = val;
+}
+
+function buildHome(){
+  const wrongIds = getWrongIds();
+  const banner = document.getElementById('wrong-banner');
+  banner.style.display = wrongIds.size > 0 ? 'flex' : 'none';
+  if(wrongIds.size > 0) document.getElementById('wrong-count-label').textContent = wrongIds.size+'問';
+
+  // Count available questions
+  let total = QUESTIONS.length;
+  document.getElementById('total-count').textContent = total;
+}
+
+function getFilteredPool(){
+  let qs = [...QUESTIONS];
+  if(cfg.typeFilter !== 'all') qs = qs.filter(q=>q.type===cfg.typeFilter);
+  return qs;
+}
+
+// Adaptive selection: weight by difficulty vs mastery proxy
+function buildQueue(pool){
+  if(pool.length === 0) return [];
+  const wrongIds = getWrongIds();
+  // Simple mastery proxy: count of wrong IDs in pool
+  const wrongCount = pool.filter(q=>wrongIds.has(q.id)).length;
+  const masteryPct = pool.length > 0 ? Math.max(0, 1 - wrongCount/pool.length) : 1;
+  const idealDiff = masteryPct < 0.4 ? 1 : masteryPct < 0.75 ? 2 : 3;
+
+  const scored = pool.map(q => {
+    const diffDist = Math.abs(q.diff - idealDiff);
+    let w = Math.max(1, 8 - diffDist * 2);
+    if(wrongIds.has(q.id)) w += 4;
+    return {q, w};
+  });
+
+  const result = [], used = new Set();
+  const count = cfg.countSetting === 0 ? pool.length : Math.min(cfg.countSetting, pool.length);
+
+  for(let i=0; i<count; i++){
+    const available = scored.filter(x=>!used.has(x.q.id));
+    if(available.length === 0) break;
+    const total = available.reduce((a,x)=>a+x.w, 0);
+    let r = Math.random() * total;
+    for(const {q, w} of available){
+      r -= w;
+      if(r <= 0){ result.push(q); used.add(q.id); break; }
+    }
+  }
+  return result;
+}
+
+function startNormalMode(){
+  sess.wrongMode = false;
+  const pool = getFilteredPool();
+  if(pool.length === 0){ alert('条件に合う問題がありません。'); return; }
+  sess.queue = buildQueue(pool);
+  sess.index = 0; sess.correct = 0; sess.wrongInSession = [];
+  showScreen('quiz');
+  showQuestion();
+}
+
+function startWrongMode(){
+  sess.wrongMode = true;
+  const wrongIds = getWrongIds();
+  if(wrongIds.size === 0){ alert('苦手問題はありません！'); return; }
+  let pool = QUESTIONS.filter(q=>wrongIds.has(q.id));
+  if(cfg.typeFilter !== 'all') pool = pool.filter(q=>q.type===cfg.typeFilter);
+  if(pool.length === 0) pool = QUESTIONS.filter(q=>wrongIds.has(q.id));
+  sess.queue = shuffle([...pool]);
+  sess.index = 0; sess.correct = 0; sess.wrongInSession = [];
+  showScreen('quiz');
+  showQuestion();
+}
+
+// ============================================================
+// TIMER
+// ============================================================
+function startTimer(){
+  clearInterval(sess.timerInterval);
+  const secs = cfg.timerSetting;
+  const row = document.getElementById('timer-row');
+  if(secs === 0){ row.style.display = 'none'; return; }
+  row.style.display = 'flex';
+  sess.timerRemaining = secs;
+  sess.timerTotal = secs;
+  updateTimerUI();
+  sess.timerInterval = setInterval(()=>{
+    sess.timerRemaining--;
+    updateTimerUI();
+    if(sess.timerRemaining <= 0){ clearInterval(sess.timerInterval); timeOut(); }
+  }, 1000);
+}
+
+function stopTimer(){ clearInterval(sess.timerInterval); }
+
+function updateTimerUI(){
+  const pct = sess.timerRemaining / sess.timerTotal * 100;
+  const numEl = document.getElementById('timer-num');
+  const fillEl = document.getElementById('timer-bar-fill');
+  numEl.textContent = sess.timerRemaining;
+  numEl.className = 'timer-num' + (pct <= 25 ? ' danger' : pct <= 50 ? ' warn' : '');
+  fillEl.style.width = pct + '%';
+  fillEl.style.background = pct <= 25 ? 'var(--danger)' : pct <= 50 ? 'var(--warn)' : 'var(--success)';
+}
+
+function timeOut(){
+  if(sess.answered) return;
+  sess.answered = true;
+  const q = sess.queue[sess.index];
+  addWrongId(q.id);
+  sess.wrongInSession.push({q, yourAnswer:'（時間切れ）'});
+  if(q.type === 'fill'){
+    document.querySelectorAll('.choice-btn').forEach(btn=>{
+      btn.disabled = true;
+      if(btn.textContent === q.answer) btn.classList.add('correct');
+    });
+  } else {
+    document.getElementById('check-btn').disabled = true;
+    // Show correct words in pool
+    const pool = document.getElementById('order-pool');
+    const correctRow = document.createElement('div');
+    correctRow.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;';
+    q.words.forEach(w=>{
+      const c=document.createElement('div');
+      c.className='word-chip correct';c.textContent=w;
+      correctRow.appendChild(c);
+    });
+    pool.innerHTML='<div style="font-size:.75rem;color:var(--sub);margin-bottom:6px;">正しい語順：</div>';
+    pool.appendChild(correctRow);
+  }
+  showFeedback(false, q, '（時間切れ）');
+}
+
+// ============================================================
+// QUIZ
+// ============================================================
+function showQuestion(){
+  if(sess.index >= sess.queue.length){ endQuiz(); return; }
+  const q = sess.queue[sess.index];
+  sess.answered = false;
+
+  const pct = Math.round(sess.index / sess.queue.length * 100);
+  document.getElementById('pbar-fill').style.width = pct+'%';
+  document.getElementById('quiz-correct').textContent = sess.correct;
+  document.getElementById('quiz-prog-label').textContent =
+    'Program 1 — '+(sess.index+1)+'/'+sess.queue.length+'問';
+
+  const badge = document.getElementById('qtype-badge');
+  if(q.type==='fill'){
+    badge.textContent='穴埋め（4択）';badge.className='qtype-badge qtype-fill';
+  } else {
+    badge.textContent='並べ替え';badge.className='qtype-badge qtype-order';
+  }
+  document.getElementById('grammar-tag').textContent = q.grammar;
+  document.getElementById('translation-box').textContent = q.tr;
+
+  document.getElementById('hint-box').style.display='none';
+  document.getElementById('hint-box').textContent=q.hint||'';
+  document.getElementById('hint-btn').style.display=q.hint?'block':'none';
+  document.getElementById('feedback-bar').style.display='none';
+  document.getElementById('feedback-bar').className='feedback-bar';
+  document.getElementById('next-btn').style.display='none';
+
+  if(q.type==='fill'){
+    document.getElementById('fill-ui').style.display='block';
+    document.getElementById('order-ui').style.display='none';
+    renderFill(q);
+  } else {
+    document.getElementById('fill-ui').style.display='none';
+    document.getElementById('order-ui').style.display='block';
+    renderOrder(q);
+  }
+  startTimer();
+}
+
+function renderFill(q){
+  const parts = q.sentence.split('___');
+  const sentEl = document.getElementById('fill-sentence');
+  sentEl.innerHTML='';
+  parts.forEach((part,i)=>{
+    sentEl.appendChild(document.createTextNode(part));
+    if(i<parts.length-1){
+      const sp=document.createElement('span');
+      sp.className='fill-blank';sp.id='fill-blank-display';
+      sp.textContent='\u00a0\u00a0\u00a0\u00a0';
+      sentEl.appendChild(sp);
+    }
+  });
+  const grid=document.getElementById('choices-grid');
+  grid.innerHTML='';
+  shuffle([...q.choices]).forEach(choice=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';btn.textContent=choice;
+    btn.onclick=()=>answerFill(choice,q);
+    grid.appendChild(btn);
+  });
+}
+
+function answerFill(chosen, q){
+  if(sess.answered) return;
+  sess.answered=true;
+  stopTimer();
+  const correct = chosen===q.answer;
+
+  const blank=document.getElementById('fill-blank-display');
+  if(blank){ blank.textContent=q.answer; blank.style.color=correct?'var(--success)':'var(--danger)'; }
+
+  document.querySelectorAll('.choice-btn').forEach(btn=>{
+    btn.disabled=true;
+    if(btn.textContent===q.answer) btn.classList.add('correct');
+    else if(btn.textContent===chosen&&!correct){ btn.classList.add('wrong'); btn.classList.add('shake'); }
+  });
+
+  if(correct){ sess.correct++; removeWrongId(q.id); }
+  else { addWrongId(q.id); sess.wrongInSession.push({q,yourAnswer:chosen}); }
+  showFeedback(correct,q,chosen);
+}
+
+function renderOrder(q){
+  sess.orderPool=[];
+  sess.orderSelected=[];
+  const ansArea=document.getElementById('order-answer-area');
+  const pool=document.getElementById('order-pool');
+  ansArea.innerHTML='';ansArea.classList.add('empty');
+  pool.innerHTML='';
+
+  shuffle([...q.words]).forEach((word,i)=>{
+    const chip=document.createElement('div');
+    chip.className='word-chip pop';chip.textContent=word;chip.dataset.idx=i;
+    chip.onclick=()=>pickWord(chip,i);
+    pool.appendChild(chip);
+    sess.orderPool.push({word,el:chip,idx:i,placed:false,placedEl:null});
+  });
+  document.getElementById('check-btn').disabled=true;
+}
+
+function pickWord(chip,idx){
+  if(sess.answered) return;
+  const item=sess.orderPool[idx];
+  if(!item||item.placed) return;
+
+  item.placed=true;
+  chip.style.visibility='hidden';
+  const ansArea=document.getElementById('order-answer-area');
+  const placed=document.createElement('div');
+  placed.className='word-chip placed pop';
+  placed.textContent=item.word;
+  placed.dataset.idx=idx;
+  placed.onclick=()=>returnWord(placed,idx);
+  ansArea.appendChild(placed);
+  item.placedEl=placed;
+  ansArea.classList.remove('empty');
+  sess.orderSelected.push(idx);
+  document.getElementById('check-btn').disabled=false;
+}
+
+function returnWord(placedEl,idx){
+  if(sess.answered) return;
+  const item=sess.orderPool[idx];
+  if(!item) return;
+  item.placed=false;
+  item.el.style.visibility='visible';
+  placedEl.remove();
+  item.placedEl=null;
+  sess.orderSelected=sess.orderSelected.filter(i=>i!==idx);
+  if(sess.orderSelected.length===0) document.getElementById('order-answer-area').classList.add('empty');
+  document.getElementById('check-btn').disabled=sess.orderSelected.length===0;
+}
+
+// ★ BUG FIX: normalize spaces around punctuation before comparing
+function normalizeAnswer(s){
+  return s.replace(/\s+([.,!?;:])/g,'$1').trim();
+}
+
+function checkOrder(){
+  if(sess.answered) return;
+  sess.answered=true;
+  stopTimer();
+  const q=sess.queue[sess.index];
+  const ansArea=document.getElementById('order-answer-area');
+  const chips=[...ansArea.querySelectorAll('.word-chip')];
+  const userAnswer=chips.map(c=>c.textContent).join(' ');
+  const correct=normalizeAnswer(userAnswer)===normalizeAnswer(q.answer);
+
+  chips.forEach(c=>{ c.classList.remove('placed'); c.classList.add(correct?'correct':'wrong'); });
+  document.getElementById('check-btn').disabled=true;
+
+  if(correct){ sess.correct++; removeWrongId(q.id); }
+  else {
+    addWrongId(q.id);
+    sess.wrongInSession.push({q,yourAnswer:userAnswer});
+    const pool=document.getElementById('order-pool');
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;';
+    q.words.forEach(w=>{ const c=document.createElement('div');c.className='word-chip correct';c.textContent=w;row.appendChild(c); });
+    pool.innerHTML='<div style="font-size:.75rem;color:var(--sub);margin-bottom:6px;">正しい語順：</div>';
+    pool.appendChild(row);
+  }
+  showFeedback(correct,q,userAnswer);
+}
+
+function showFeedback(correct, q, userAnswer){
+  const fb=document.getElementById('feedback-bar');
+  if(correct){
+    fb.className='feedback-bar ok';
+    fb.innerHTML='⭕ 正解！';
+    fb.classList.add('pulse');
+  } else {
+    fb.className='feedback-bar ng';
+    fb.innerHTML=`❌ 不正解<div class="correct-ans">正解：${q.answer}</div>`+
+      `<div class="ref-row">📖 教科書 <b>${q.tbPage}</b> ／ 語順ドリル <b>${q.drillNo}</b>（<b>${q.drillPage}</b>）を確認しよう</div>`;
+  }
+  fb.style.display='block';
+  document.getElementById('quiz-correct').textContent=sess.correct;
+  document.getElementById('next-btn').style.display='block';
+}
+
+function nextQuestion(){
+  sess.index++;
+  showQuestion();
+}
+
+function toggleHint(){
+  const box=document.getElementById('hint-box');
+  box.style.display=box.style.display==='none'?'block':'none';
+}
+
+// ============================================================
+// END QUIZ
+// ============================================================
+function endQuiz(){
+  stopTimer();
+  const total=sess.queue.length;
+  const pct=total>0?Math.round(sess.correct/total*100):0;
+  let emoji='😢';
+  if(pct===100)emoji='🏆';
+  else if(pct>=80)emoji='😄';
+  else if(pct>=60)emoji='🙂';
+  else if(pct>=40)emoji='😅';
+
+  document.getElementById('result-emoji').textContent=emoji;
+  document.getElementById('result-score-big').textContent=`${sess.correct} / ${total}問 正解`;
+  document.getElementById('result-sub').textContent=`正答率 ${pct}%`;
+  setTimeout(()=>{ document.getElementById('result-bar-fill').style.width=pct+'%'; },100);
+
+  const wrongSec=document.getElementById('wrong-section');
+  const wrongList=document.getElementById('wrong-list');
+  wrongList.innerHTML='';
+  if(sess.wrongInSession.length>0){
+    wrongSec.style.display='block';
+    sess.wrongInSession.forEach(({q,yourAnswer})=>{
+      const qText=q.type==='fill'
+        ? q.sentence.replace('___',`【${q.answer}】`)
+        : q.answer;
+      const item=document.createElement('div');
+      item.className='wrong-item';
+      item.innerHTML=`<div class="q-label">${q.grammar}</div>
+        <div class="q-text">${qText}</div>
+        <div class="your-ans">あなたの答え：${yourAnswer}</div>
+        <div class="correct-ans">正しい答え：${q.answer}</div>
+        <div class="refs">📖 教科書 <b>${q.tbPage}</b> ／ 語順ドリル <b>${q.drillNo}</b>（<b>${q.drillPage}</b>）</div>`;
+      wrongList.appendChild(item);
+    });
+    document.getElementById('retry-wrong-btn').style.display='block';
+  } else {
+    wrongSec.style.display='none';
+    document.getElementById('retry-wrong-btn').style.display='none';
+  }
+  showScreen('result');
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function showScreen(name){
+  ['home','quiz','result'].forEach(s=>{
+    document.getElementById('screen-'+s).style.display=(s===name)?'flex':'none';
+  });
+}
+function showHome(){ buildHome(); showScreen('home'); }
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+showHome();
+</script>
+</body>
+</html>
